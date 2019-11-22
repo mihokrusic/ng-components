@@ -1,0 +1,10 @@
+*.*
+
+!*.js
+!*.ts
+!*.html
+!*.css
+!*.less
+!*.json
+
+package-lock.json
