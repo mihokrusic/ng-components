@@ -1,7 +1,20 @@
 .components {
     margin: 20px;
 
-    .inner {
-        width: 600px;
+    .component-container {
+        display: flex;
+        align-items: flex-start;
+        width: 700px;
+
+        .component {
+            flex: 1 1 0px;
+        }
+
+        .options {
+            width: 200px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
     }
 }

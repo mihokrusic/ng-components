@@ -1,5 +1,29 @@
 <div class="components">
     <div class="inner">
-        <app-chips-multiselect [options]="options"></app-chips-multiselect>
+        <h1>Chips List Autocomplete</h1>
+        <div class="component-container">
+            <div class="component">
+                <app-chips-multiselect
+                    [options]="options"
+                    [multiselect]="chipsMultiselect"
+                    [inlineAdd]="chipsInlineAdd"
+                    [selectItemOnBlur]="chipsSelectItemOnBlur"
+                ></app-chips-multiselect>
+            </div>
+            <div class="options">
+                <label for="multiselect">
+                    Multiselect
+                    <input [(ngModel)]="chipsMultiselect" type="checkbox" name="multiselect" id="multiselect" />
+                </label>
+                <label for="inlineAdd">
+                    Inline Add
+                    <input [(ngModel)]="chipsInlineAdd" type="checkbox" name="inlineAdd" id="inlineAdd" />
+                </label>
+                <label for="selectItemOnBlur">
+                    Select Item On Blur
+                    <input [(ngModel)]="chipsSelectItemOnBlur" type="checkbox" name="selectItemOnBlur" id="selectItemOnBlur" />
+                </label>
+            </div>
+        </div>
     </div>
 </div>

@@ -1,24 +1,28 @@
-<h1>Chips List Autocomplete</h1>
-<mat-form-field class="example-chip-list">
+<mat-form-field>
     <mat-chip-list #chipList>
-        <mat-chip *ngFor="let selectedOption of selectedOptions" [selectable]="selectable" [removable]="removable" (removed)="remove(selectedOption)">
-            {{ selectedOption }}
-            <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+        <mat-chip
+            *ngFor="let selectedOption of selectedOptions"
+            [selectable]="true"
+            [removable]="true"
+            [class.new]="selectedOption.isNew"
+            (removed)="remove(selectedOption)"
+        >
+            <span title="{{ selectedOption.name }}">{{ selectedOption.name }}</span>
+            <mat-icon matChipRemove *ngIf="true">cancel</mat-icon>
         </mat-chip>
         <input
-            #fruitInput
-            placeholder=""
-            [formControl]="fruitCtrl"
+            #inputElement
+            [formControl]="inputControl"
             [matAutocomplete]="auto"
             [matChipInputFor]="chipList"
             [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-            [matChipInputAddOnBlur]="addOnBlur"
+            [matChipInputAddOnBlur]="selectItemOnBlur"
             (matChipInputTokenEnd)="add($event)"
         />
     </mat-chip-list>
     <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
-        <mat-option *ngFor="let fruit of filteredFruits | async" [value]="fruit">
-            {{ fruit }}
+        <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+            {{ option.name }}
         </mat-option>
     </mat-autocomplete>
 </mat-form-field>

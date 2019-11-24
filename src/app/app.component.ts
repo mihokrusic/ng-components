@@ -15,5 +15,11 @@ export class AppComponent {
         { id: '5', name: 'Elephant' },
         { id: '6', name: 'Bird' },
         { id: '7', name: 'Fish' },
+        { id: '8', name: 'TestAnimalWithBigNameSoWeCanSeeHowItBehavesInOverflow' },
+        { id: '9', name: 'Test Animal With Big Name So We Can See How It Behaves In Overflow' },
     ];
+
+    chipsMultiselect: boolean = true;
+    chipsInlineAdd: boolean = true;
+    chipsSelectItemOnBlur: boolean = true;
 }

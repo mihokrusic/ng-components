@@ -1,5 +1,5 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { Component, ElementRef, ViewChild, Input } from '@angular/core';
+import { Component, ElementRef, ViewChild, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent, MatAutocomplete } from '@angular/material/autocomplete';
 import { MatChipInputEvent } from '@angular/material/chips';
@@ -7,79 +7,139 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { ChipsOptionItem } from './chips-multiselect.models';
 
+interface ChipsOptionsItemInternal extends ChipsOptionItem {
+    isNew?: boolean;
+}
+
 @Component({
     selector: 'app-chips-multiselect',
     templateUrl: './chips-multiselect.component.html',
     styleUrls: ['./chips-multiselect.component.less'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChipsMultiselectComponent {
-    // New params
+export class ChipsMultiselectComponent implements OnInit {
     @Input() options: ChipsOptionItem[];
-    selectedOptions: string[] = [];
+    @Input() multiselect: boolean = true;
+    @Input() inlineAdd: boolean = true;
+    @Input() selectItemOnBlur: boolean = true;
 
-    visible = true;
-    selectable = true;
-    removable = true;
-    addOnBlur = true;
-    separatorKeysCodes: number[] = [ENTER, COMMA];
-    fruitCtrl = new FormControl();
-
-    filteredFruits: Observable<string[]>;
-    allFruits: string[] = ['Apple', 'Lemon', 'Lime', 'Orange', 'Strawberry'];
-
-    @ViewChild('fruitInput', { static: false }) fruitInput: ElementRef<HTMLInputElement>;
+    @ViewChild('inputElement', { static: false }) inputElement: ElementRef<HTMLInputElement>;
     @ViewChild('auto', { static: false }) matAutocomplete: MatAutocomplete;
 
+    remainingOptions: ChipsOptionsItemInternal[] = [];
+    selectedOptions: ChipsOptionsItemInternal[] = [];
+    filteredOptions: Observable<ChipsOptionsItemInternal[]>;
+
+    separatorKeysCodes: number[] = [ENTER, COMMA];
+    inputControl = new FormControl();
+
+    private newItemsCounter: number = 0;
+
     constructor() {
-        this.filteredFruits = this.fruitCtrl.valueChanges.pipe(
+        this.filteredOptions = this.inputControl.valueChanges.pipe(
             startWith(null),
-            map((fruit: string | null) => (fruit ? this._filter(fruit) : this.allFruits.slice())),
+            map((inputValue: string | ChipsOptionsItemInternal | null) => {
+                return typeof inputValue === 'string' ? this.filterItemsByName(inputValue) : this.remainingOptions.slice();
+            }),
         );
     }
 
+    ngOnInit() {
+        this.remainingOptions = this.options.slice();
+    }
+
     add(event: MatChipInputEvent): void {
-        // Add fruit only when MatAutocomplete is not open
+        // Add option only when MatAutocomplete is not open
         // To make sure this does not conflict with OptionSelected Event
         if (!this.matAutocomplete.isOpen) {
             const input = event.input;
-            const value = event.value;
+            const inputValue = event.value;
 
-            console.log(value);
+            if ((inputValue || '').trim()) {
+                const addedItem = this.getItemByName(inputValue.trim());
+                if (!addedItem) {
+                    return;
+                }
 
-            // Add our fruit
-            if ((value || '').trim()) {
-                this.selectedOptions.push(value.trim());
+                this.addItemToSelected(addedItem);
             }
 
-            // Reset the input value
             if (input) {
                 input.value = '';
             }
 
-            this.fruitCtrl.setValue(null);
+            this.inputControl.setValue(null);
         }
     }
 
-    remove(option: string): void {
-        const index = this.selectedOptions.indexOf(option);
-
-        if (index >= 0) {
-            this.selectedOptions.splice(index, 1);
-        }
+    remove(optionToRemove: ChipsOptionsItemInternal): void {
+        this.removeItemFromSelected(optionToRemove);
     }
 
     selected(event: MatAutocompleteSelectedEvent): void {
-        this.selectedOptions.push(event.option.viewValue);
-        this.fruitInput.nativeElement.value = '';
-        this.fruitCtrl.setValue(null);
+        const addedItem = event.option.value as ChipsOptionsItemInternal;
+
+        this.addItemToSelected(addedItem);
+
+        this.inputElement.nativeElement.value = '';
+        this.inputControl.setValue(null);
     }
 
-    private _filter(value: string): string[] {
-        const filterValue = value.toLowerCase();
-        const filteredValues = this.allFruits.filter(fruit => fruit.toLowerCase().indexOf(filterValue) === 0);
+    private addItemToSelected(optionToAdd: ChipsOptionsItemInternal) {
+        if (optionToAdd.isNew) {
+            this.newItemsCounter++;
+            optionToAdd.id = (-this.newItemsCounter).toString();
+        }
+        this.selectedOptions.push(optionToAdd);
 
-        if (!filteredValues.some(value => value === filterValue)) {
-            filteredValues.push(`${value} (new)`);
+        if (!optionToAdd.isNew) {
+            const itemIndex = this.remainingOptions.findIndex(item => item.id === optionToAdd.id);
+            if (itemIndex >= 0) {
+                this.remainingOptions.splice(itemIndex, 1);
+            }
+        }
+    }
+
+    private removeItemFromSelected(optionToRemove: ChipsOptionsItemInternal) {
+        const index = this.selectedOptions.findIndex(option => option.id === optionToRemove.id);
+        if (index === -1) {
+            throw new Error("Can't find option to remove in selected options");
+        }
+
+        this.selectedOptions.splice(index, 1);
+
+        if (optionToRemove.isNew) {
+            this.newItemsCounter--;
+        } else {
+            this.remainingOptions.push(optionToRemove);
+        }
+    }
+
+    private getItemByName(name: string) {
+        const existingItem = this.remainingOptions.find(option => option.name === name);
+        if (existingItem) {
+            return existingItem;
+        } else if (this.inlineAdd) {
+            return {
+                id: null,
+                isNew: true,
+                name: `${name} (new)`,
+            };
+        }
+
+        return null;
+    }
+
+    private filterItemsByName(value: string): ChipsOptionsItemInternal[] {
+        const filterValue = value.toLowerCase();
+        const filteredValues = this.remainingOptions.filter(option => option.name.toLowerCase().indexOf(filterValue) === 0);
+
+        if (this.inlineAdd && !filteredValues.some(filteredValue => filteredValue.name === filterValue)) {
+            filteredValues.push({
+                id: null,
+                isNew: true,
+                name: `${value} (new)`,
+            });
         }
 
         return filteredValues;
