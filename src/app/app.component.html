@@ -7,7 +7,7 @@
                     [options]="options"
                     [multiselect]="chipsMultiselect"
                     [inlineAdd]="chipsInlineAdd"
-                    [selectItemOnBlur]="chipsSelectItemOnBlur"
+                    [selectOnBlur]="chipsSelectOnBlur"
                 ></app-chips-multiselect>
             </div>
             <div class="options">
@@ -19,9 +19,9 @@
                     Inline Add
                     <input [(ngModel)]="chipsInlineAdd" type="checkbox" name="inlineAdd" id="inlineAdd" />
                 </label>
-                <label for="selectItemOnBlur">
-                    Select Item On Blur
-                    <input [(ngModel)]="chipsSelectItemOnBlur" type="checkbox" name="selectItemOnBlur" id="selectItemOnBlur" />
+                <label for="selectOnBlur">
+                    Select On Blur
+                    <input [(ngModel)]="chipsSelectOnBlur" type="checkbox" name="selectOnBlur" id="selectOnBlur" />
                 </label>
             </div>
         </div>

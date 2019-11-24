@@ -10,13 +10,18 @@
             <span title="{{ selectedOption.name }}">{{ selectedOption.name }}</span>
             <mat-icon matChipRemove *ngIf="true">cancel</mat-icon>
         </mat-chip>
+
+        <!-- <mat-chip [selectable]="false" [removable]="false">
+            <span>+2</span>
+        </mat-chip> -->
+
         <input
             #inputElement
             [formControl]="inputControl"
             [matAutocomplete]="auto"
             [matChipInputFor]="chipList"
             [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-            [matChipInputAddOnBlur]="selectItemOnBlur"
+            [matChipInputAddOnBlur]="selectOnBlur"
             (matChipInputTokenEnd)="add($event)"
         />
     </mat-chip-list>

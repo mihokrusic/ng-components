@@ -21,5 +21,5 @@ export class AppComponent {
 
     chipsMultiselect: boolean = true;
     chipsInlineAdd: boolean = true;
-    chipsSelectItemOnBlur: boolean = true;
+    chipsSelectOnBlur: boolean = true;
 }

@@ -21,7 +21,7 @@ export class ChipsMultiselectComponent implements OnInit {
     @Input() options: ChipsOptionItem[];
     @Input() multiselect: boolean = true;
     @Input() inlineAdd: boolean = true;
-    @Input() selectItemOnBlur: boolean = true;
+    @Input() selectOnBlur: boolean = true;
 
     @ViewChild('inputElement', { static: false }) inputElement: ElementRef<HTMLInputElement>;
     @ViewChild('auto', { static: false }) matAutocomplete: MatAutocomplete;
@@ -52,23 +52,18 @@ export class ChipsMultiselectComponent implements OnInit {
         // Add option only when MatAutocomplete is not open
         // To make sure this does not conflict with OptionSelected Event
         if (!this.matAutocomplete.isOpen) {
-            const input = event.input;
             const inputValue = event.value;
 
-            if ((inputValue || '').trim()) {
-                const addedItem = this.getItemByName(inputValue.trim());
-                if (!addedItem) {
-                    return;
-                }
-
-                this.addItemToSelected(addedItem);
+            if ((inputValue || '').trim() === '') {
+                return;
             }
 
-            if (input) {
-                input.value = '';
+            const addedItem = this.getItemByName(inputValue.trim());
+            if (!addedItem) {
+                return;
             }
 
-            this.inputControl.setValue(null);
+            this.addItemToSelected(addedItem);
         }
     }
 
@@ -80,9 +75,6 @@ export class ChipsMultiselectComponent implements OnInit {
         const addedItem = event.option.value as ChipsOptionsItemInternal;
 
         this.addItemToSelected(addedItem);
-
-        this.inputElement.nativeElement.value = '';
-        this.inputControl.setValue(null);
     }
 
     private addItemToSelected(optionToAdd: ChipsOptionsItemInternal) {
@@ -98,6 +90,13 @@ export class ChipsMultiselectComponent implements OnInit {
                 this.remainingOptions.splice(itemIndex, 1);
             }
         }
+
+        this.inputElement.nativeElement.value = '';
+        this.inputControl.setValue(null);
+
+        if (!this.multiselect) {
+            this.inputControl.disable();
+        }
     }
 
     private removeItemFromSelected(optionToRemove: ChipsOptionsItemInternal) {
@@ -112,6 +111,10 @@ export class ChipsMultiselectComponent implements OnInit {
             this.newItemsCounter--;
         } else {
             this.remainingOptions.push(optionToRemove);
+        }
+
+        if (this.inputControl.disabled) {
+            this.inputControl.enable();
         }
     }
 
