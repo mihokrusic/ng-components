@@ -1,10 +1,8 @@
-name: CI
-
+name: Deploy to WebFaction 
 on: 
   push:
     branches:    
     - master
-
 jobs:
   build:
 
