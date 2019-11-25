@@ -8,11 +8,17 @@ jobs:
     name: FTP-Deploy-Action
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - name: FTP-Deploy-Action
-      uses: SamKirkland/FTP-Deploy-Action@2.0.0
-      env:
-        FTP_SERVER: ftp.samkirkland.com
-        FTP_USERNAME: myFTPUsername
-        FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-        ARGS: --delete --dry-run
+    - uses: actions/checkout@master    
+      
+    - name: Use Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+        
+    - name: Build Project
+      run: |
+        npm install
+        npm run build --if-present
+        
+    - name: List output files
+      run: ls
